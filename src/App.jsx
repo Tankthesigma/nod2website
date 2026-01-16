@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   Dna,
   FlaskConical,
@@ -17,13 +17,33 @@ import {
   TrendingUp,
   Shield,
   Flame,
-  BarChart3,
-  TrendingDown,
-  Beaker
+  HelpCircle,
+  X,
+  TrendingDown
 } from 'lucide-react'
+
+// Method explanation popup component
+function MethodTooltip({ title, description, isOpen, onClose }) {
+  if (!isOpen) return null
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50" onClick={onClose}>
+      <div className="bg-white rounded-2xl p-6 max-w-md shadow-2xl" onClick={e => e.stopPropagation()}>
+        <div className="flex justify-between items-start mb-4">
+          <h3 className="font-bold text-xl text-gray-900">{title}</h3>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+        <p className="text-gray-600">{description}</p>
+      </div>
+    </div>
+  )
+}
 
 function App() {
   const observerRef = useRef(null)
+  const [openTooltip, setOpenTooltip] = useState(null)
 
   useEffect(() => {
     observerRef.current = new IntersectionObserver(
@@ -50,8 +70,42 @@ function App() {
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' })
   }
 
+  const methodExplanations = {
+    gnina: {
+      title: "GNINA Docking",
+      description: "A deep learning-enhanced molecular docking program that predicts how small molecules bind to proteins. Uses convolutional neural networks to score protein-ligand poses, achieving better accuracy than traditional scoring functions."
+    },
+    ml: {
+      title: "Machine Learning (NOD2-Scout)",
+      description: "A custom Random Forest classifier trained on NOD2-specific features. Filters docking results by learning patterns that distinguish true binders from false positives. Achieved 0.90 AUC-ROC on validation set."
+    },
+    admet: {
+      title: "ADMET Filtering",
+      description: "Absorption, Distribution, Metabolism, Excretion, Toxicity screening. Applies drug-likeness rules (Lipinski's Rule of 5, PAINS filters) to ensure compounds can actually work as drugs in the human body."
+    },
+    md: {
+      title: "Molecular Dynamics",
+      description: "Physics-based simulation of protein-ligand complexes over time. Uses force fields to model atomic interactions. Confirms that compounds remain bound stably in the pocket rather than drifting away."
+    },
+    fep: {
+      title: "Free Energy Perturbation",
+      description: "Gold-standard method for calculating binding affinity differences. Uses thermodynamic cycles to compute ΔΔG between wild-type and mutant proteins. Computationally expensive but highly accurate."
+    }
+  }
+
   return (
     <div className="min-h-screen bg-white text-gray-900">
+      {/* Method Tooltips */}
+      {Object.entries(methodExplanations).map(([key, { title, description }]) => (
+        <MethodTooltip
+          key={key}
+          title={title}
+          description={description}
+          isOpen={openTooltip === key}
+          onClose={() => setOpenTooltip(null)}
+        />
+      ))}
+
       {/* Hero Section */}
       <section className="min-h-screen flex flex-col justify-center items-center px-6 bg-gradient-to-b from-slate-50 to-white relative">
         <div className="max-w-4xl mx-auto text-center">
@@ -210,7 +264,7 @@ function App() {
         </div>
       </section>
 
-      {/* The Pipeline with Scientific Charts */}
+      {/* The Pipeline */}
       <section className="py-24 px-6 bg-gradient-to-b from-slate-50 to-white">
         <div className="max-w-6xl mx-auto">
           <div className="fade-in text-center mb-16">
@@ -220,85 +274,112 @@ function App() {
             </p>
           </div>
 
-          {/* Scientific Funnel Chart */}
+          {/* Improved Pipeline Steps with ? explanations */}
           <div className="fade-in mb-16">
-            <div className="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm">
-              <div className="flex items-center gap-2 mb-6">
-                <BarChart3 className="w-5 h-5 text-slate-600" />
-                <h3 className="text-lg font-bold text-gray-800">Figure 1: Compound Screening Funnel</h3>
-              </div>
-              <div className="relative max-w-4xl mx-auto">
-                <div className="space-y-4">
-                  {[
-                    { label: 'Initial Library', value: '9,566', count: 9566, color: '#3b82f6', desc: 'Natural products + FDA drugs' },
-                    { label: 'GNINA Docking', value: '500', count: 500, color: '#6366f1', desc: 'CNN-scored poses' },
-                    { label: 'ML Ranking (NOD2-Scout)', value: '100', count: 100, color: '#8b5cf6', desc: 'AUC-ROC = 0.90' },
-                    { label: 'ADMET Filter', value: '12', count: 12, color: '#a855f7', desc: 'Drug-likeness criteria' },
-                    { label: 'MD Simulation (520 ns)', value: '4', count: 4, color: '#d946ef', desc: 'Binding stability' },
-                    { label: 'FEP Validated', value: '2', count: 2, color: '#14b8a6', desc: 'Gold-standard ΔΔG' },
-                  ].map((step, i) => (
-                    <div key={i} className="flex items-center gap-4">
-                      <div className="w-48 text-right">
-                        <div className="text-sm font-semibold text-gray-700">{step.label}</div>
-                        <div className="text-xs text-gray-500">{step.desc}</div>
-                      </div>
-                      <div className="flex-1 relative">
-                        <div
-                          className="h-12 rounded-lg flex items-center px-4 transition-all duration-1000 relative overflow-hidden"
-                          style={{
-                            width: `${Math.max(8, (step.count / 9566) * 100)}%`,
-                            backgroundColor: step.color,
-                            minWidth: '80px'
-                          }}
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+              {[
+                {
+                  icon: FlaskConical,
+                  label: '9,566',
+                  sublabel: 'Compounds',
+                  color: 'blue',
+                  desc: 'Natural products + FDA drugs',
+                  tooltip: null
+                },
+                {
+                  icon: Target,
+                  label: 'GNINA',
+                  sublabel: 'Docking',
+                  color: 'indigo',
+                  desc: '→ 500 hits',
+                  tooltip: 'gnina'
+                },
+                {
+                  icon: Brain,
+                  label: 'ML',
+                  sublabel: 'NOD2-Scout',
+                  color: 'violet',
+                  desc: '0.90 AUC-ROC',
+                  tooltip: 'ml'
+                },
+                {
+                  icon: Filter,
+                  label: 'ADMET',
+                  sublabel: 'Filter',
+                  color: 'purple',
+                  desc: '→ 12 candidates',
+                  tooltip: 'admet'
+                },
+                {
+                  icon: Activity,
+                  label: '520 ns',
+                  sublabel: 'MD Sims',
+                  color: 'pink',
+                  desc: 'Binding stability',
+                  tooltip: 'md'
+                },
+                {
+                  icon: Zap,
+                  label: 'FEP',
+                  sublabel: '140 windows',
+                  color: 'teal',
+                  desc: '→ 2 validated',
+                  tooltip: 'fep'
+                },
+              ].map((step, i) => {
+                const colorMap = {
+                  blue: { bg: 'bg-blue-50', border: 'border-blue-200', icon: 'text-blue-600', badge: 'bg-blue-100' },
+                  indigo: { bg: 'bg-indigo-50', border: 'border-indigo-200', icon: 'text-indigo-600', badge: 'bg-indigo-100' },
+                  violet: { bg: 'bg-violet-50', border: 'border-violet-200', icon: 'text-violet-600', badge: 'bg-violet-100' },
+                  purple: { bg: 'bg-purple-50', border: 'border-purple-200', icon: 'text-purple-600', badge: 'bg-purple-100' },
+                  pink: { bg: 'bg-pink-50', border: 'border-pink-200', icon: 'text-pink-600', badge: 'bg-pink-100' },
+                  teal: { bg: 'bg-teal-50', border: 'border-teal-200', icon: 'text-teal-600', badge: 'bg-teal-100' },
+                }
+                const colors = colorMap[step.color]
+
+                return (
+                  <div key={i} className="relative">
+                    <div className={`${colors.bg} ${colors.border} border-2 rounded-2xl p-5 text-center h-full transition-all hover:shadow-lg hover:scale-105`}>
+                      {step.tooltip && (
+                        <button
+                          onClick={() => setOpenTooltip(step.tooltip)}
+                          className="absolute top-2 right-2 text-gray-400 hover:text-gray-600"
                         >
-                          <span className="text-white font-bold text-lg">{step.value}</span>
-                          <span className="text-white/70 text-sm ml-2">compounds</span>
-                        </div>
+                          <HelpCircle className="w-5 h-5" />
+                        </button>
+                      )}
+                      <div className={`w-12 h-12 ${colors.badge} rounded-xl flex items-center justify-center mx-auto mb-3`}>
+                        <step.icon className={`w-6 h-6 ${colors.icon}`} />
                       </div>
-                      <div className="w-20 text-right">
-                        <span className="text-2xl font-bold" style={{ color: step.color }}>{step.value}</span>
-                      </div>
+                      <div className="font-bold text-2xl text-gray-900">{step.label}</div>
+                      <div className="text-sm font-medium text-gray-600 mb-2">{step.sublabel}</div>
+                      <div className="text-xs text-gray-500">{step.desc}</div>
                     </div>
-                  ))}
-                </div>
-                <div className="mt-6 pt-6 border-t border-slate-200 flex justify-between text-sm text-gray-500">
-                  <span>Hit Rate: 2/9,566 = 0.021%</span>
-                  <span>Enrichment: 4,783× over random</span>
-                </div>
-              </div>
+                    {i < 5 && (
+                      <div className="hidden lg:block absolute top-1/2 -right-3 transform -translate-y-1/2 z-10">
+                        <ArrowRight className="w-5 h-5 text-gray-300" />
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
             </div>
           </div>
 
-          {/* Pipeline Steps */}
-          <div className="fade-in overflow-x-auto pb-4">
-            <div className="flex items-center gap-2 md:gap-4 min-w-max px-4 justify-center">
-              {[
-                { icon: FlaskConical, label: '9,566', sublabel: 'Compounds', bg: '#dbeafe', border: '#93c5fd', iconColor: '#2563eb' },
-                { icon: Target, label: 'GNINA', sublabel: 'Docking', bg: '#e0e7ff', border: '#a5b4fc', iconColor: '#4f46e5' },
-                { icon: Brain, label: '0.90', sublabel: 'AUC-ROC', bg: '#ede9fe', border: '#c4b5fd', iconColor: '#7c3aed' },
-                { icon: Filter, label: 'ADMET', sublabel: 'Filter', bg: '#fae8ff', border: '#e879f9', iconColor: '#c026d3' },
-                { icon: Activity, label: '520 ns', sublabel: 'MD Sims', bg: '#fce7f3', border: '#f9a8d4', iconColor: '#db2777' },
-                { icon: Zap, label: 'FEP', sublabel: '140 windows', bg: '#ccfbf1', border: '#5eead4', iconColor: '#0d9488' },
-                { icon: CheckCircle2, label: '2', sublabel: 'Validated', bg: '#ccfbf1', border: '#14b8a6', iconColor: '#0f766e' },
-              ].map((step, i) => (
-                <div key={i} className="flex items-center">
-                  <div
-                    className="p-4 md:p-6 rounded-2xl text-center min-w-[100px] md:min-w-[120px] border-2"
-                    style={{ backgroundColor: step.bg, borderColor: step.border }}
-                  >
-                    <step.icon className="w-6 h-6 md:w-8 md:h-8 mx-auto mb-2" style={{ color: step.iconColor }} />
-                    <div className="font-bold text-gray-900 text-lg md:text-xl">{step.label}</div>
-                    <div className="text-xs md:text-sm text-gray-500">{step.sublabel}</div>
-                  </div>
-                  {i < 6 && <ArrowRight className="w-4 h-4 md:w-6 md:h-6 text-gray-300 mx-1 md:mx-2 flex-shrink-0" />}
-                </div>
-              ))}
+          {/* Screening Funnel Chart */}
+          <div className="fade-in">
+            <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
+              <img
+                src="/charts/screening_funnel.png"
+                alt="Figure 3: Computational Screening Funnel showing compound reduction from 9,566 to 2 validated hits"
+                className="w-full max-w-4xl mx-auto rounded-lg"
+              />
             </div>
           </div>
         </div>
       </section>
 
-      {/* Key Results with Scientific Charts */}
+      {/* Key Results with Python Charts */}
       <section className="py-24 px-6 bg-white">
         <div className="max-w-6xl mx-auto">
           <div className="fade-in text-center mb-16">
@@ -308,166 +389,36 @@ function App() {
             </p>
           </div>
 
-          {/* Binding Free Energy Chart */}
-          <div className="fade-in mb-12">
-            <div className="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm">
-              <div className="flex items-center gap-2 mb-6">
-                <BarChart3 className="w-5 h-5 text-slate-600" />
-                <h3 className="text-lg font-bold text-gray-800">Figure 2: Binding Free Energy (ΔG<sub>bind</sub>)</h3>
-              </div>
-              <div className="max-w-3xl mx-auto">
-                {/* Y-axis label */}
-                <div className="flex items-start">
-                  <div className="w-8 flex flex-col items-center justify-center h-48 mr-4">
-                    <span className="text-xs text-gray-500 transform -rotate-90 whitespace-nowrap">ΔG (kcal/mol)</span>
-                  </div>
-
-                  {/* Chart area */}
-                  <div className="flex-1">
-                    {/* Grid lines and bars */}
-                    <div className="relative h-48 border-l-2 border-b-2 border-gray-300">
-                      {/* Grid lines */}
-                      {[0, -5, -10, -15].map((val, i) => (
-                        <div key={i} className="absolute w-full border-t border-gray-200" style={{ bottom: `${(Math.abs(val) / 15) * 100}%` }}>
-                          <span className="absolute -left-8 -top-2 text-xs text-gray-500">{val}</span>
-                        </div>
-                      ))}
-
-                      {/* Bars */}
-                      <div className="absolute bottom-0 left-0 right-0 flex justify-around items-end h-full px-8">
-                        {/* Febuxostat WT */}
-                        <div className="flex flex-col items-center">
-                          <div
-                            className="w-16 bg-gradient-to-t from-blue-600 to-blue-400 rounded-t-lg relative"
-                            style={{ height: `${(10.4 / 15) * 100}%` }}
-                          >
-                            <span className="absolute -top-6 left-1/2 -translate-x-1/2 text-sm font-bold text-blue-600">-10.4</span>
-                          </div>
-                          <span className="text-xs mt-2 text-gray-600">Feb (WT)</span>
-                        </div>
-
-                        {/* Febuxostat MUT */}
-                        <div className="flex flex-col items-center">
-                          <div
-                            className="w-16 bg-gradient-to-t from-blue-400 to-blue-300 rounded-t-lg relative border-2 border-dashed border-blue-600"
-                            style={{ height: `${(8.0 / 15) * 100}%` }}
-                          >
-                            <span className="absolute -top-6 left-1/2 -translate-x-1/2 text-sm font-bold text-blue-400">-8.0</span>
-                          </div>
-                          <span className="text-xs mt-2 text-gray-600">Feb (R702W)</span>
-                        </div>
-
-                        {/* Bufadienolide WT */}
-                        <div className="flex flex-col items-center">
-                          <div
-                            className="w-16 bg-gradient-to-t from-teal-600 to-teal-400 rounded-t-lg relative"
-                            style={{ height: `${(15.2 / 15) * 100}%` }}
-                          >
-                            <span className="absolute -top-6 left-1/2 -translate-x-1/2 text-sm font-bold text-teal-600">-15.2</span>
-                          </div>
-                          <span className="text-xs mt-2 text-gray-600">Buf (WT)</span>
-                        </div>
-
-                        {/* Bufadienolide MUT */}
-                        <div className="flex flex-col items-center">
-                          <div
-                            className="w-16 bg-gradient-to-t from-teal-500 to-teal-400 rounded-t-lg relative border-2 border-dashed border-teal-600"
-                            style={{ height: `${(15.7 / 15) * 100}%` }}
-                          >
-                            <span className="absolute -top-6 left-1/2 -translate-x-1/2 text-sm font-bold text-teal-500">-15.7</span>
-                          </div>
-                          <span className="text-xs mt-2 text-gray-600">Buf (R702W)</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Legend */}
-                    <div className="flex justify-center gap-8 mt-6 text-sm">
-                      <div className="flex items-center gap-2">
-                        <div className="w-4 h-4 bg-blue-500 rounded"></div>
-                        <span>Febuxostat</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <div className="w-4 h-4 bg-teal-500 rounded"></div>
-                        <span>Bufadienolide</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <div className="w-4 h-4 border-2 border-dashed border-gray-400 rounded"></div>
-                        <span>R702W Mutant</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <p className="text-center text-sm text-gray-500 mt-4">
-                  More negative = stronger binding. Error bars: ± 0.2-0.3 kcal/mol (not shown for clarity)
-                </p>
-              </div>
+          {/* Python-generated Charts */}
+          <div className="fade-in grid md:grid-cols-2 gap-8 mb-12">
+            <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
+              <img
+                src="/charts/binding_energy.png"
+                alt="Figure 1: FEP-Calculated Binding Affinities showing Febuxostat and Bufadienolide binding energies with error bars"
+                className="w-full rounded-lg"
+              />
+            </div>
+            <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
+              <img
+                src="/charts/ddg_comparison.png"
+                alt="Figure 2: Mutation Effect showing ΔΔG comparison between Febuxostat (+2.34) and Bufadienolide (-0.44)"
+                className="w-full rounded-lg"
+              />
             </div>
           </div>
 
-          {/* ΔΔG Comparison Chart */}
+          {/* WT vs MUT Chart */}
           <div className="fade-in mb-12">
-            <div className="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm">
-              <div className="flex items-center gap-2 mb-6">
-                <TrendingDown className="w-5 h-5 text-slate-600" />
-                <h3 className="text-lg font-bold text-gray-800">Figure 3: Mutation Effect (ΔΔG = ΔG<sub>MUT</sub> - ΔG<sub>WT</sub>)</h3>
-              </div>
-              <div className="max-w-2xl mx-auto">
-                <div className="grid md:grid-cols-2 gap-8">
-                  {/* Febuxostat */}
-                  <div className="bg-gradient-to-br from-red-50 to-orange-50 p-6 rounded-2xl border border-red-200">
-                    <div className="flex items-center gap-2 mb-4">
-                      <Pill className="w-6 h-6 text-blue-600" />
-                      <span className="font-bold text-lg">Febuxostat</span>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-6xl font-bold text-red-500 mb-2">+2.34</div>
-                      <div className="text-lg text-gray-600">kcal/mol</div>
-                      <div className="mt-4 p-3 bg-red-100 rounded-lg">
-                        <div className="flex items-center justify-center gap-2 text-red-700">
-                          <TrendingDown className="w-5 h-5" />
-                          <span className="font-semibold">~50× weaker binding</span>
-                        </div>
-                      </div>
-                    </div>
-                    <p className="text-sm text-gray-500 mt-4 text-center">
-                      Positive ΔΔG = mutation weakens binding
-                    </p>
-                  </div>
-
-                  {/* Bufadienolide */}
-                  <div className="bg-gradient-to-br from-teal-50 to-emerald-50 p-6 rounded-2xl border border-teal-200">
-                    <div className="flex items-center gap-2 mb-4">
-                      <Leaf className="w-6 h-6 text-teal-600" />
-                      <span className="font-bold text-lg">Bufadienolide</span>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-6xl font-bold text-teal-500 mb-2">-0.44</div>
-                      <div className="text-lg text-gray-600">kcal/mol</div>
-                      <div className="mt-4 p-3 bg-teal-100 rounded-lg">
-                        <div className="flex items-center justify-center gap-2 text-teal-700">
-                          <Shield className="w-5 h-5" />
-                          <span className="font-semibold">Mutation-resistant</span>
-                        </div>
-                      </div>
-                    </div>
-                    <p className="text-sm text-gray-500 mt-4 text-center">
-                      ΔΔG ≈ 0 = no effect from mutation
-                    </p>
-                  </div>
-                </div>
-
-                <div className="mt-6 p-4 bg-slate-50 rounded-xl text-center">
-                  <p className="text-sm text-gray-600">
-                    <strong>Statistical significance:</strong> Febuxostat ΔΔG = 8σ (p &lt; 0.001); Bufadienolide ΔΔG = 1.8σ (not significant)
-                  </p>
-                </div>
-              </div>
+            <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
+              <img
+                src="/charts/wt_vs_mut.png"
+                alt="Figure 4: Wild-Type vs Mutant Binding comparison"
+                className="w-full max-w-3xl mx-auto rounded-lg"
+              />
             </div>
           </div>
 
-          {/* Two Cards */}
+          {/* Summary Cards */}
           <div className="grid md:grid-cols-2 gap-8">
             {/* Febuxostat Card */}
             <div className="fade-in bg-gradient-to-br from-blue-50 to-indigo-50 p-8 rounded-3xl border border-blue-100 relative overflow-hidden">
@@ -495,18 +446,14 @@ function App() {
                   </div>
                   <div className="flex justify-between items-center py-2 border-b border-blue-100">
                     <span className="text-gray-600">ΔΔG</span>
-                    <span className="font-bold text-xl text-red-600">+2.34 kcal/mol</span>
-                  </div>
-                  <div className="flex justify-between items-center py-2">
-                    <span className="text-gray-600">K<sub>d</sub> (WT)</span>
-                    <span className="font-bold text-gray-900">~25 nM</span>
+                    <span className="font-bold text-2xl text-red-600">+2.34 kcal/mol</span>
                   </div>
                 </div>
 
-                <div className="p-4 bg-blue-100/50 rounded-xl">
-                  <p className="text-sm text-blue-800">
-                    <TrendingUp className="w-4 h-4 inline mr-2" />
-                    Could enter clinical trials immediately (already FDA-approved for gout)
+                <div className="p-4 bg-red-100/50 rounded-xl">
+                  <p className="text-sm text-red-800 flex items-center gap-2">
+                    <TrendingDown className="w-4 h-4" />
+                    <span><strong>~50× weaker</strong> binding in mutant patients</span>
                   </p>
                 </div>
               </div>
@@ -543,18 +490,14 @@ function App() {
                   </div>
                   <div className="flex justify-between items-center py-2 border-b border-teal-100">
                     <span className="text-gray-600">ΔΔG</span>
-                    <span className="font-bold text-xl text-teal-600">-0.44 kcal/mol</span>
-                  </div>
-                  <div className="flex justify-between items-center py-2">
-                    <span className="text-gray-600">K<sub>d</sub> (WT)</span>
-                    <span className="font-bold text-gray-900">~5 pM</span>
+                    <span className="font-bold text-2xl text-teal-600">-0.44 kcal/mol</span>
                   </div>
                 </div>
 
                 <div className="p-4 bg-teal-100/50 rounded-xl">
-                  <p className="text-sm text-teal-800">
-                    <Sparkles className="w-4 h-4 inline mr-2" />
-                    First report of bufadienolide-NOD2 binding. Works for ALL patients!
+                  <p className="text-sm text-teal-800 flex items-center gap-2">
+                    <Shield className="w-4 h-4" />
+                    <span><strong>Mutation-resistant</strong> - works for ALL patients!</span>
                   </p>
                 </div>
               </div>
@@ -608,18 +551,26 @@ function App() {
       <section className="py-24 px-6 bg-slate-50">
         <div className="max-w-6xl mx-auto">
           <div className="fade-in text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Methods Summary</h2>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">Methods</h2>
+            <p className="text-gray-600">Click the <HelpCircle className="w-4 h-4 inline" /> icons above for detailed explanations</p>
           </div>
 
           <div className="fade-in grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
-              { title: 'Virtual Screening', value: 'GNINA v1.0', desc: 'CNN-based molecular docking', icon: Target },
-              { title: 'Machine Learning', value: 'AUC = 0.90', desc: 'Random Forest classifier', icon: Brain },
-              { title: 'MD Simulation', value: '520 ns', desc: 'OpenMM 8.0, AMBER ff14SB', icon: Activity },
-              { title: 'Free Energy', value: '140 windows', desc: 'FEP + MBAR analysis', icon: Zap },
+              { title: 'Virtual Screening', value: 'GNINA', desc: 'Deep learning docking', icon: Target, tooltip: 'gnina' },
+              { title: 'Machine Learning', value: 'RF Classifier', desc: 'Custom NOD2-Scout', icon: Brain, tooltip: 'ml' },
+              { title: 'MD Simulation', value: '520 ns', desc: 'All-atom dynamics', icon: Activity, tooltip: 'md' },
+              { title: 'Free Energy', value: 'FEP + MBAR', desc: 'Gold-standard ΔΔG', icon: Zap, tooltip: 'fep' },
             ].map((method, i) => (
-              <div key={i} className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-                <method.icon className="w-8 h-8 text-teal-600 mb-4" />
+              <div
+                key={i}
+                className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm cursor-pointer hover:shadow-md transition-all"
+                onClick={() => setOpenTooltip(method.tooltip)}
+              >
+                <div className="flex items-start justify-between mb-4">
+                  <method.icon className="w-8 h-8 text-teal-600" />
+                  <HelpCircle className="w-5 h-5 text-gray-400" />
+                </div>
                 <h3 className="font-bold text-lg mb-1">{method.title}</h3>
                 <div className="text-2xl font-bold text-gray-900 mb-2">{method.value}</div>
                 <p className="text-sm text-gray-500">{method.desc}</p>
@@ -627,28 +578,25 @@ function App() {
             ))}
           </div>
 
-          {/* Computational Resources */}
+          {/* Computational Stats */}
           <div className="fade-in mt-12">
             <div className="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm">
-              <div className="flex items-center gap-2 mb-6">
-                <Beaker className="w-5 h-5 text-slate-600" />
-                <h3 className="text-lg font-bold text-gray-800">Computational Resources</h3>
-              </div>
+              <h3 className="text-lg font-bold text-gray-800 text-center mb-8">Computational Scale</h3>
               <div className="grid md:grid-cols-3 gap-8">
                 <div className="text-center">
                   <div className="text-5xl font-bold text-indigo-600 mb-2">520</div>
-                  <div className="text-gray-600">nanoseconds</div>
-                  <div className="text-sm text-gray-500 mt-1">MD simulation time</div>
+                  <div className="text-gray-600 font-medium">nanoseconds</div>
+                  <div className="text-sm text-gray-500 mt-1">total MD simulation</div>
                 </div>
                 <div className="text-center">
                   <div className="text-5xl font-bold text-amber-600 mb-2">140</div>
-                  <div className="text-gray-600">FEP windows</div>
-                  <div className="text-sm text-gray-500 mt-1">alchemical transformations</div>
+                  <div className="text-gray-600 font-medium">FEP windows</div>
+                  <div className="text-sm text-gray-500 mt-1">alchemical perturbations</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-5xl font-bold text-pink-600 mb-2">200+</div>
-                  <div className="text-gray-600">GPU hours</div>
-                  <div className="text-sm text-gray-500 mt-1">cloud compute (Vast.ai)</div>
+                  <div className="text-5xl font-bold text-pink-600 mb-2">9,566</div>
+                  <div className="text-gray-600 font-medium">compounds</div>
+                  <div className="text-sm text-gray-500 mt-1">screened computationally</div>
                 </div>
               </div>
             </div>

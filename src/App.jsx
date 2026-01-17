@@ -283,7 +283,7 @@ function App() {
                   label: '9,566',
                   sublabel: 'Compounds',
                   color: 'blue',
-                  desc: 'Natural products + FDA drugs',
+                  desc: '7,414 natural + 2,152 FDA',
                   tooltip: null
                 },
                 {
@@ -321,7 +321,7 @@ function App() {
                 {
                   icon: Zap,
                   label: 'FEP',
-                  sublabel: '140 windows',
+                  sublabel: '120 windows',
                   color: 'teal',
                   desc: '→ 2 validated',
                   tooltip: 'fep'
@@ -589,7 +589,7 @@ function App() {
                   <div className="text-sm text-gray-500 mt-1">total MD simulation</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-5xl font-bold text-amber-600 mb-2">140</div>
+                  <div className="text-5xl font-bold text-amber-600 mb-2">120</div>
                   <div className="text-gray-600 font-medium">FEP windows</div>
                   <div className="text-sm text-gray-500 mt-1">alchemical perturbations</div>
                 </div>

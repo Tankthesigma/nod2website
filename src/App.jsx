@@ -307,7 +307,7 @@ function App() {
                   label: 'ADMET',
                   sublabel: 'Filter',
                   color: 'purple',
-                  desc: '→ 12 candidates',
+                  desc: '→ 8 candidates',
                   tooltip: 'admet'
                 },
                 {

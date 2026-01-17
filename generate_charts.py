@@ -108,7 +108,7 @@ print("Created: ddg_comparison.png")
 fig3, ax3 = plt.subplots(figsize=(10, 7))
 
 stages = ['Initial Library', 'GNINA Docking', 'ML Ranking', 'ADMET Filter', 'MD Simulation', 'FEP Validated']
-counts = [9566, 500, 100, 12, 4, 2]
+counts = [9566, 500, 100, 8, 4, 2]
 colors_funnel = ['#3b82f6', '#6366f1', '#8b5cf6', '#a855f7', '#d946ef', '#14b8a6']
 
 # Create horizontal bar chart (funnel-like)

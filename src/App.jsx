@@ -77,7 +77,7 @@ function App() {
     },
     ml: {
       title: "Machine Learning (NOD2-Scout)",
-      description: "A custom Random Forest classifier trained on NOD2-specific features. Filters docking results by learning patterns that distinguish true binders from false positives. Achieved 0.90 AUC-ROC on validation set."
+      description: "A custom XGBoost classifier trained on NOD2-specific features. Filters docking results by learning patterns that distinguish true binders from false positives. Achieved 0.85-0.93 AUC-ROC on 5-fold cross-validation with scaffold split."
     },
     admet: {
       title: "ADMET Filtering",
@@ -299,7 +299,7 @@ function App() {
                   label: 'ML',
                   sublabel: 'NOD2-Scout',
                   color: 'violet',
-                  desc: '0.90 AUC-ROC',
+                  desc: '0.85-0.93 AUC',
                   tooltip: 'ml'
                 },
                 {
@@ -558,7 +558,7 @@ function App() {
           <div className="fade-in grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
               { title: 'Virtual Screening', value: 'GNINA', desc: 'Deep learning docking', icon: Target, tooltip: 'gnina' },
-              { title: 'Machine Learning', value: 'RF Classifier', desc: 'Custom NOD2-Scout', icon: Brain, tooltip: 'ml' },
+              { title: 'Machine Learning', value: 'XGBoost', desc: 'Custom NOD2-Scout', icon: Brain, tooltip: 'ml' },
               { title: 'MD Simulation', value: '520 ns', desc: 'All-atom dynamics', icon: Activity, tooltip: 'md' },
               { title: 'Free Energy', value: 'FEP + MBAR', desc: 'Gold-standard ΔΔG', icon: Zap, tooltip: 'fep' },
             ].map((method, i) => (
